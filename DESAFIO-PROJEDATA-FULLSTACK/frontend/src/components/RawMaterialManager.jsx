@@ -1,6 +1,6 @@
 import React from 'react';
 import MaterialForm from './MaterialForm';
-import InventoryList from './InventoryDashboard'; // Reutilizando sua lista
+import InventoryList from './InventoryDashboard'; // Reutilizando a lista
 
 const RawMaterialManager = () => {
   return (

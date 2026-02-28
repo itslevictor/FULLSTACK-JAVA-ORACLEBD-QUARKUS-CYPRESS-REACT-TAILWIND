@@ -15,7 +15,7 @@ const ProductForm = () => {
   const [neededQuantity, setNeededQuantity] = useState('');
   const [recipe, setRecipe] = useState([]);
   
-  // NOVO: Estado para erro visual
+  // Estado para erro visual
   const [formError, setFormError] = useState(null);
 
   useEffect(() => {
@@ -118,7 +118,7 @@ const ProductForm = () => {
       dispatch(setEditingProduct(null));
     } catch (error) {
       console.log("DEBUG ERROR:", error);
-      // CORREÇÃO: Pega a string de erro do backend ou uma mensagem padrão
+      // Pega a string de erro do backend ou uma mensagem padrão
       const errorMessage = typeof error === 'string' ? error : (error.message || "The product already exists");
       setFormError(errorMessage);
     }

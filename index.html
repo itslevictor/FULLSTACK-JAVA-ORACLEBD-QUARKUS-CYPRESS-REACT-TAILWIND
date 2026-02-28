@@ -47,7 +47,7 @@
             const [newProd, setNewProd] = useState({ id: null, name: '', price: '', bom: [] });
             const [bomEntry, setBomEntry] = useState({ matId: '', qty: 0 });
 
-            // Lógica Corrigida: Production Suggestion (Greedy Otimizado)
+            // Production Suggestion (Greedy Otimizado)
             const suggestion = useMemo(() => {
                 let tempStock = { ...materials.reduce((acc, m) => ({ ...acc, [m.id]: m.qty }), {}) };
                 let totalProfit = 0;

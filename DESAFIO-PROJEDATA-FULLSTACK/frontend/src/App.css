@@ -3,7 +3,6 @@
   width: 100%;
   margin: 0;
   padding: 0;
-  /* Removido o max-width e text-center que espremiam os formulários */
   text-align: left; 
 }
 

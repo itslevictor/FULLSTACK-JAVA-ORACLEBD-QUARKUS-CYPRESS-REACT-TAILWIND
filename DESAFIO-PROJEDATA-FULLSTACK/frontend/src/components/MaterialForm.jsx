@@ -49,7 +49,7 @@ const MaterialForm = () => {
       }
       handleCancel();
     } catch (error) {
-      // CORREÇÃO: Extrai a string de erro (ex: "The material '...' is already saved")
+      // Extrai a string de erro (ex: "The material '...' is already saved")
       const errorMessage = typeof error === 'string' ? error : (error.message || "Material save error");
       setFormError(errorMessage);
     }
@@ -99,7 +99,7 @@ const MaterialForm = () => {
             />
         </div>
 
-        {/* ÁREA DE ERRO: Exibe a mensagem do Java em um box vermelho discreto */}
+        {/* ÁREA DE ERRO: Exibe a mensagem do Java em um box vermelho */}
         {formError && (
           <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-xl animate-in slide-in-from-top-2 duration-300">
             <p className="text-red-500 text-[11px] font-bold text-center italic">
