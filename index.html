@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projedata Inventory - Greedy Optimized</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #050a18; color: white; margin: 0; }
+        .glass-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 12px; }
+        .input-dark { background: #070c1b; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; color: white; font-size: 13px; width: 100%; outline: none; }
+        
+        @media (min-width: 769px) { .mobile-nav { display: none !important; } }
+        @media (max-width: 768px) {
+            .mobile-nav { display: flex; gap: 8px; width: 100%; margin-bottom: 20px; }
+            .nav-btn { background: #1e293b; color: #94a3b8; flex: 1; padding: 10px; border-radius: 8px; font-weight: 800; font-size: 10px; }
+            .nav-btn.active { background: #2563eb; color: white; }
+            .mobile-hide { display: none !important; }
+        }
+
+        .card-editing { border: 2px solid #dc2626 !important; }
+        .btn-cancel { background: #1e293b; color: #94a3b8; font-weight: 800; font-size: 10px; padding: 0 12px; border-radius: 8px; border: 1px solid #334155; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function App() {
+            const [view, setView] = useState('dash');
+            const [materials, setMaterials] = useState([
+                { id: 1, name: 'Steel Plate', qty: 50 },
+                { id: 2, name: 'Wood Planks', qty: 110 }
+            ]);
+            const [products, setProducts] = useState([
+                { id: 1, name: 'Industrial Chair', price: 120.0, bom: [{ matId: 1, name: 'Steel Plate', qty: 10 }] }
+            ]);
+
+            const [newMat, setNewMat] = useState({ id: null, name: '', qty: 0 });
+            const [newProd, setNewProd] = useState({ id: null, name: '', price: '', bom: [] });
+            const [bomEntry, setBomEntry] = useState({ matId: '', qty: 0 });
+
+            // Lógica Corrigida: Production Suggestion (Greedy Otimizado)
+            const suggestion = useMemo(() => {
+                let tempStock = { ...materials.reduce((acc, m) => ({ ...acc, [m.id]: m.qty }), {}) };
+                let totalProfit = 0;
+                let itemsToProduce = [];
+
+                // Ordenação inteligente:
+                // 1º Preço mais alto.
+                // 2º Se preço igual, quem consome MENOS unidades de material no total (Eficiência).
+                const sortedProducts = [...products].sort((a, b) => {
+                    if (b.price !== a.price) return b.price - a.price;
+                    const totalConsumptionA = a.bom.reduce((acc, item) => acc + item.qty, 0);
+                    const totalConsumptionB = b.bom.reduce((acc, item) => acc + item.qty, 0);
+                    return totalConsumptionA - totalConsumptionB;
+                });
+
+                sortedProducts.forEach(p => {
+                    let possible = true;
+                    let count = 0;
+                    while (possible) {
+                        for (let item of p.bom) {
+                            if ((tempStock[item.matId] || 0) < item.qty) { 
+                                possible = false; 
+                                break; 
+                            }
+                        }
+                        if (possible) {
+                            p.bom.forEach(item => tempStock[item.matId] -= item.qty);
+                            count++;
+                            totalProfit += p.price;
+                        }
+                    }
+                    if (count > 0) itemsToProduce.push({ name: p.name, count, profit: count * p.price });
+                });
+                return { itemsToProduce, totalProfit };
+            }, [materials, products]);
+
+            const resetForms = () => {
+                setNewMat({ id: null, name: '', qty: 0 });
+                setNewProd({ id: null, name: '', price: '', bom: [] });
+                setBomEntry({ matId: '', qty: 0 });
+            };
+
+            return (
+                <div className="min-h-screen p-6 md:p-10 max-w-[1400px] mx-auto">
+                    <header className="flex justify-between items-center mb-8">
+                        <div>
+                            <h1 className="text-2xl font-black italic">Projedata <span className="text-blue-500">Inventory</span></h1>
+                            <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Management & Production Optimizer</p>
+                        </div>
+                        <div className="hidden md:flex items-center gap-2 bg-slate-900 border border-slate-800 px-4 py-1 rounded-full">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                            <span className="text-[9px] text-emerald-500 font-bold">SYSTEM ONLINE</span>
+                        </div>
+                    </header>
+
+                    <div className="mobile-nav">
+                        <button onClick={() => setView('dash')} className={`nav-btn ${view === 'dash' ? 'active' : ''}`}>DASH</button>
+                        <button onClick={() => setView('materials')} className={`nav-btn ${view === 'materials' ? 'active' : ''}`}>MATERIALS</button>
+                        <button onClick={() => setView('products')} className={`nav-btn ${view === 'products' ? 'active' : ''}`}>PRODUCTS</button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+                        <div className="md:col-span-4 space-y-6">
+                            <section className={view === 'materials' ? 'block' : 'mobile-hide md:block'}>
+                                <div className={`glass-card p-5 space-y-4 ${newMat.id ? 'card-editing' : 'border-t-4 border-blue-600'}`}>
+                                    <h3 className="text-[10px] font-bold uppercase text-blue-500">01 Material Registration</h3>
+                                    <input className="input-dark" placeholder="Material Name" value={newMat.name} onChange={e => setNewMat({...newMat, name: e.target.value})}/>
+                                    <input className="input-dark" type="number" value={newMat.qty} onChange={e => setNewMat({...newMat, qty: Number(e.target.value)})}/>
+                                    <div className="flex gap-2">
+                                        <button className={`flex-1 py-3 rounded-lg font-black text-[10px] uppercase ${newMat.id ? 'bg-red-600' : 'bg-blue-600'}`} onClick={() => {
+                                            if(newMat.id) setMaterials(materials.map(m => m.id === newMat.id ? newMat : m));
+                                            else setMaterials([...materials, {...newMat, id: Date.now()}]);
+                                            resetForms();
+                                        }}>{newMat.id ? 'Update' : '+ Add'}</button>
+                                        {newMat.id && <button className="btn-cancel" onClick={resetForms}>CANCEL</button>}
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section className={view === 'products' ? 'block' : 'mobile-hide md:block'}>
+                                <div className={`glass-card p-5 space-y-4 ${newProd.id ? 'card-editing' : 'border-t-4 border-emerald-600'}`}>
+                                    <h3 className="text-[10px] font-bold uppercase text-emerald-500">02 Product Registration</h3>
+                                    <input className="input-dark" placeholder="Product Name" value={newProd.name} onChange={e => setNewProd({...newProd, name: e.target.value})}/>
+                                    <input className="input-dark" placeholder="Price (BRL)" value={newProd.price} onChange={e => setNewProd({...newProd, price: e.target.value})}/>
+                                    
+                                    <div className="bg-slate-900/50 p-3 rounded-lg border border-slate-800 space-y-2">
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase">Bill of Materials (BOM)</p>
+                                        <div className="flex gap-2">
+                                            <select className="input-dark flex-1" value={bomEntry.matId} onChange={e => setBomEntry({...bomEntry, matId: e.target.value})}>
+                                                <option value="">Select Material...</option>
+                                                {materials.map(m => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                            </select>
+                                            <input className="input-dark w-20" type="number" placeholder="Qty" value={bomEntry.qty} onChange={e => setBomEntry({...bomEntry, qty: Number(e.target.value)})}/>
+                                            <button className="bg-blue-600 px-3 rounded-lg text-xs" onClick={() => {
+                                                const mat = materials.find(m => m.id == bomEntry.matId);
+                                                if(mat) setNewProd({...newProd, bom: [...newProd.bom, { matId: mat.id, name: mat.name, qty: bomEntry.qty }]});
+                                            }}>Add</button>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            {newProd.bom.map((b, i) => (
+                                                <span key={i} className="text-[9px] bg-slate-800 px-2 py-1 rounded border border-slate-700">
+                                                    {b.qty}x {b.name} <i className="fas fa-times ml-1 cursor-pointer text-red-500" onClick={() => setNewProd({...newProd, bom: newProd.bom.filter((_, idx) => idx !== i)})}></i>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2">
+                                        <button className={`flex-1 py-3 rounded-lg font-black text-[10px] uppercase ${newProd.id ? 'bg-red-600' : 'bg-emerald-600'}`} onClick={() => {
+                                            const p = {...newProd, price: parseFloat(newProd.price), id: newProd.id || Date.now()};
+                                            if(newProd.id) setProducts(products.map(x => x.id === p.id ? p : x));
+                                            else setProducts([...products, p]);
+                                            resetForms();
+                                        }}>{newProd.id ? 'Confirm Changes' : 'Save Final Product'}</button>
+                                        {newProd.id && <button className="btn-cancel" onClick={resetForms}>CANCEL</button>}
+                                    </div>
+                                </div>
+                            </section>
+                        </div>
+
+                        <div className={`md:col-span-8 space-y-6 ${view === 'dash' ? 'block' : 'mobile-hide md:block'}`}>
+                            <div className="glass-card p-6 border-l-4 border-blue-500 flex justify-between items-center">
+                                <div>
+                                    <h3 className="italic font-black text-sm">⚡ PRODUCTION SUGGESTION</h3>
+                                    {suggestion.itemsToProduce.length > 0 ? suggestion.itemsToProduce.map((it, i) => (
+                                        <p key={i} className="text-xs font-bold text-slate-400">Produce {it.count} units of {it.name}</p>
+                                    )) : <p className="text-xs text-slate-600 italic">No production possible with current stock.</p>}
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-[8px] text-emerald-500 font-bold uppercase">Estimated Profit</p>
+                                    <p className="text-2xl font-black text-emerald-400 font-mono">R$ {suggestion.totalProfit.toFixed(2)}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="glass-card p-5">
+                                    <p className="text-[9px] font-bold text-slate-500 uppercase mb-4">Stock Summary</p>
+                                    {materials.map(m => (
+                                        <div key={m.id} className="flex justify-between items-center py-3 border-b border-slate-800/50">
+                                            <span className="text-xs font-bold">{m.name}</span>
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs font-black text-blue-500">{m.qty} <small className="text-[8px]">UN</small></span>
+                                                <i className="fas fa-edit text-slate-600 cursor-pointer hover:text-white" onClick={() => {setNewMat(m); if(window.innerWidth <= 768) setView('materials');}}></i>
+                                                <i className="fas fa-trash-alt text-red-900/40 cursor-pointer hover:text-red-500" onClick={() => setMaterials(materials.filter(x => x.id !== m.id))}></i>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="glass-card p-5">
+                                    <p className="text-[9px] font-bold text-slate-500 uppercase mb-4">Products & BOM</p>
+                                    {products.map(p => (
+                                        <div key={p.id} className="bg-slate-900/40 p-3 rounded-lg mb-3 border border-slate-800">
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-xs font-black">{p.name}</p>
+                                                    <p className="text-[10px] text-emerald-500">R$ {p.price.toFixed(2)}</p>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <i className="fas fa-edit text-slate-600 cursor-pointer hover:text-white" onClick={() => {setNewProd({...p, price: p.price.toString()}); if(window.innerWidth <= 768) setView('products');}}></i>
+                                                    <i className="fas fa-trash-alt text-red-900/40 cursor-pointer hover:text-red-500" onClick={() => setProducts(products.filter(x => x.id !== p.id))}></i>
+                                                </div>
+                                            </div>
+                                            <div className="flex flex-wrap gap-1 mt-2">
+                                                {p.bom.map((b, i) => <span key={i} className="text-[7px] bg-slate-800 px-1 rounded text-slate-500">{b.qty}x {b.name}</span>)}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

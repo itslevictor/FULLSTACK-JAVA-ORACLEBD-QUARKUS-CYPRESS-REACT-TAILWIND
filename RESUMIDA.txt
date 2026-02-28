@@ -1,0 +1,40 @@
+1- quem é?
+industria que produz produtos diversos
+
+2 - necessidade
+Controle de estoque de materia prima que sera usada
+para produção na fabrica (logistica)
+
+- Sistema que controle os produtos e materias primas usadas em cada
+
+Restrição técnica
+- Produto deve armazenar código, nome e preço
+- Materia prime armazenar codigo, nome, quantidade em estoque e
+      associar produtos às materias primas que os compõem e a quantidade
+      necessaria para produção
+- Manutenção do cadastro, saber quais produtos e quantidades podem
+      ser produzidos com as materias do estoque, e o valor total a
+      ser obtido com a produção sugerida pelo sistema
+- Priorização de produtos com maior valor uma vez que uma materia
+      prima pode ser usada em mais de um produto
+
+--------
+RF e RNF
+- Requisitos não funcionais
+RNF001/RNF002/RNF003/  Pagina WEB  – API (back, e front delimitados e separados) - Frontend responsivo 
+RNF004/RNF005/ Persistencia de dados em SGBD (preferencia Oracle) - Backend em framework (Spring, Quarkus, preferencia Quarkus)
+RNF006/RNF007 – O front-end em React e Redux - Tudo em Ingles
+
+- Requisitos funcionais
+Backend
+RF001/RF002/RF003 – CRUD para manter o cadastro de produtos e matérias primas - associar matérias-primas aos produtos.
+RF004 – Desenvolver a consulta dos produtos que podem ser produzidos com as matérias-primas disponíveis em estoque (endpoint).
+
+Frontend
+RF005/RF006/RF007 – interface gráfica para CRUD para manter o cadastro de produtos e materias primas - associar matérias-primas aos produtos (na interface de cadastro do produto)
+RF008 – interface gráfica listar quais produtos e quantidades podem ser produzidos com as matérias-primas disponíveis.
+------
+Observação
+Nao citou se precisa de imagem
+Nao citou sobre persistencia de dados em sessão ou cache.
+Nao citou sobre integração com cloud, ou formas de conexão.
