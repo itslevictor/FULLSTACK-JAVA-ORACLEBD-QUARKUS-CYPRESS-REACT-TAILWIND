@@ -1,4 +1,6 @@
 # 📦 Inventory & Production Management System
+## Indicador de Venda para Lucro Máximo.
+### Sales indicator to maximize profit
 
 ### Choose your language / Escolha seu idioma:
 
